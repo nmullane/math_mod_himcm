@@ -15,7 +15,7 @@ class heating_zone:
         self.temp.append(self.morning_temp)
         self.wattage = wattage
         self.energy_usage.append(0)   #KwH
-        self.time.append(bld.morning)
+        self.time.append(0)
         
     def update_temp(self, target_temp, outside_temp=-1, timestep_min=5.0, heating_constant = .020):
         self.temp.append( self.temp[-1] + timestep_min * heating_constant * (target_temp - self.temp[-1]))
