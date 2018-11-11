@@ -31,6 +31,8 @@ if __name__=="__main__":
     zone2 = hz.heating_zone(28, 17, 20, 1.5)
     zone3 = hz.heating_zone(31, 23, 25, 1.5)
 
+    house = building(3, [zone1, zone2, zone3])
+
     while zone.time[-1] < 48:
         if(zone.time[-1]%24.0 >= morning and zone.time[-1]%24.0 < day):
             zone.update_temp(zone.morning_temp)
@@ -38,6 +40,3 @@ if __name__=="__main__":
             zone.update_temp(zone.day_temp)
         else:   
             zone.update_temp(zone.night_temp)
-    house = building(
-
-

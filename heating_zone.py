@@ -31,7 +31,7 @@ if( __name__ == "__main__"):
     zone = heating_zone(25, 20, 18, 1.5)
     while zone.time[-1] < 48:
         if(zone.time[-1]%24.0 >= bld.morning and zone.time[-1]%24.0 < bld.day):
-            zone.update_temp(zone.bld.morning_temp)
+            zone.update_temp(zone.morning_temp)
         elif(zone.time[-1]%24.0 >= bld.day and zone.time[-1]%24.0 < bld.night):
             zone.update_temp(zone.day_temp)
         else:
