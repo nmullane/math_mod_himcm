@@ -20,7 +20,7 @@ class building:
             else:
                 self.zones[i].update_temp(target_temps[i], outside_temp, timestep_min, heating_constants[i])
         self.time.append(self.time[-1] + timestep_min / 60)
-        print self.time[-1]
+        #print self.time[-1]
     def plot_zone_data_over_time(self, zones, var):
         plt.figure(1)
         plt.rc('axes', prop_cycle=(cycler('color', ['r', 'g', 'b', 'y'])))
