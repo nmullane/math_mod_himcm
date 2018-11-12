@@ -36,5 +36,5 @@ if( __name__ == "__main__"):
             zone.update_temp(zone.day_temp)
         else:
             zone.update_temp(zone.night_temp)
-    #zone.graph_over_time(zone.temp)
-    zone.graph_over_time(zone.energy_usage)
+    zone.graph_over_time(zone.temp)
+    #zone.graph_over_time(zone.energy_usage)
