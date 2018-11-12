@@ -17,9 +17,9 @@ class heating_zone:
         self.energy_usage.append(0)   #KwH
         self.time.append(0)
         
-    def update_temp(self, target_temp, outside_temp=-1, timestep_min=5.0, heating_constant = 1.4/60):
-        self.temp.append( self.temp[-1] + timestep_min * heating_constant * (target_temp - self.temp[-1]))
-        self.energy_usage.append(self.energy_usage[-1] + timestep_min * 60 * self.airmass * (abs(self.temp[-2] - self.temp[-1])))
+    def update_temp(self, target_temp, outside_temp=10, timestep_min=5.0, heating_constant = 2.4/60, insulation = 0.033/60):
+        self.temp.append( self.temp[-1] + timestep_min *( heating_constant * (target_temp - self.temp[-1]) +  insulation * (outside_temp - self.temp[-1]) ))
+        self.energy_usage.append(self.energy_usage[-1] + timestep_min * 60 * self.airmass * (abs(timestep_min * heating_constant * (target_temp - self.temp[-1]))))
         self.time.append(self.time[-1] + timestep_min / 60)
         #print self.temp[-1]
     def graph_over_time(self, var):
