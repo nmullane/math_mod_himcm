@@ -31,8 +31,8 @@ class building:
 
 if __name__=="__main__":
     zone1 = hz.heating_zone(25, 20, 18, 1.5)
-    zone2 = hz.heating_zone(28, 17, 20, 1.5)
-    zone3 = hz.heating_zone(31, 23, 25, 1.5)
+    zone2 = hz.heating_zone(28, 17, 20, 1.8)
+    zone3 = hz.heating_zone(31, 23, 25, 2.2)
 
     house = building(3, [zone1, zone2, zone3])
 
@@ -44,4 +44,4 @@ if __name__=="__main__":
         else:   
             house.update_zones([zone1.night_temp, zone2.night_temp, zone3.night_temp])
 
-    house.plot_zone_data_over_time([zone1, zone2, zone3],"temp")
+    house.plot_zone_data_over_time([zone1, zone2, zone3],"energy_usage")
