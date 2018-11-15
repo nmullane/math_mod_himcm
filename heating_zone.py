@@ -21,7 +21,7 @@ class heating_zone:
         
         
     def update_temp(self, target_temp, outside_temp=10, timestep_min=5.0, heating_constant = 2.4/60, insulation = 0.033/60):
-        if target_temp = -1:
+        if target_temp == -1:
             target_temp = self.temp[-1]
         delta_T = timestep_min *( heating_constant * (target_temp - self.temp[-1]) +  insulation * (outside_temp - self.temp[-1]) )
 
