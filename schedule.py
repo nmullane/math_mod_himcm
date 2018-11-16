@@ -62,7 +62,7 @@ print("PREDICT")
 
 result = model.predict(data)
 #print(result.shape)
-print(result)
+#print(result)
 print("DONE")
 
 def plot_history(history):
@@ -85,7 +85,7 @@ def plot_predict(result, labels):
   _ = plt.plot([0, 1], [0, 1])
   plt.show()
 
-plot_history(history)
+#plot_history(history)
 #plot_predict(result, labels)
 
 """
