@@ -14,11 +14,14 @@ activities <- read.table("atus_00001.dat", header=T, sep = " ")
 #Remove activities at home
 not_at_home <- activities[activities$Location != 101,]
 #Analyze structure
+
+"Structure of not at home"
 summary(not_at_home)
 dim(not_at_home)
 
 #Analyze start times
 start_times <- as.character(not_at_home$Start_time)
+end_times <- as.character(not_at_home$end_time)
 #Analyze structure
 "Start Times Character Array"
 summary(start_times)
@@ -30,12 +33,28 @@ start_times <- sapply(strsplit(start_times,":"),
         x[1]+x[2]/60+x[3]/3600
     }
 )
+end_times <- sapply(strsplit(end_times,":"),
+    function(x) {
+        x <- as.numeric(x)
+        x[1]+x[2]/60+x[3]/3600
+    }
+)
 #Analyze vals
 "Start Times Numeric times"
 summary(start_times)
 
+"End Times Numeric times"
+summary(end_times)
 
+colnames(not_at_home)[colnames(not_at_home)=="Start_time"] <- "start_time"
 
+not_at_home$start_time <- start_times
+not_at_home$end_time <- end_times
+write.csv(not_at_home, "not_at_home_activities.csv")
+
+"Not at home summary"
+summary(not_at_home)
+not_at_home
 #GUI Things
 x11()
 
