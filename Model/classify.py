@@ -5,112 +5,88 @@ import numpy as np
 import matplotlib.pyplot as plt
 import schedule_generator as sg
 
-#class network:
-#    def __init__(self, days):
+class Network:
+    def __init__(self):
+        self.class_names = ['away', 'home']
+        self.model = tf.keras.Sequential([
+              layers.Dense(1024, activation='relu'),
+              layers.Dense(512, activation='relu'),
+              layers.Dense(256, activation='relu'),
+              layers.Dense(128, activation='relu'),
+              layers.Dense(64, activation='relu'),
+              layers.Dense(32, activation='relu'),
+              layers.Dense(16, activation='relu'),
+              layers.Dense(8, activation='relu'),
+              layers.Dense(4, activation='relu'),
+              layers.Dense(2, activation='relu'),
+              layers.Dense(2, activation='softmax')
+        ])
+        self.loss = 'sparse_categorical_crossentropy'
+        self.metric = 'accuracy'
+        self.step_size = 0.001 
+        #self.event = event
+        #self.days = days
+        self.history = 0
+        self.results = 0
 
-class_names = ['away', 'home']
+    def trainNetwork(self,epoch_num,data,labels):
+        train_data = data
+        train_labels = labels
+        self.model.compile(
+              optimizer=tf.train.AdamOptimizer(self.step_size),
+              loss=self.loss,
+              metrics=[self.metric])
+        class PrintDot(keras.callbacks.Callback):
+          def on_epoch_end(self, epoch, logs):
+            if epoch % 100 == 0: print('')
+            print('.', end='')
+        #early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10000)
+        history = self.model.fit(train_data, train_labels, epochs=epoch_num, validation_split=0.2, verbose=0, callbacks=[PrintDot()])
+        self.history = history
+        return history
+ 
+    def testNetwork(self,data,labels):
+        test_data = data
+        test_labels = labels
+        eva = self.model.evaluate(test_data, test_labels)
+        print(eva)
+        results = self.model.predict(test_data)
+        results = np.array(list(np.argmax(results, axis=1)))
+        self.results = results
+        return results
 
-model = tf.keras.Sequential([
-# Adds a densely-connected layer with 64 units to the model:
-layers.Dense(512, activation='relu'),
-# Add another:
-layers.Dense(256, activation='relu'),
-# Add another:
-layers.Dense(128, activation='relu'),
-# Add another:
-layers.Dense(64, activation='relu'),
-# Add another:
-layers.Dense(32, activation='relu'),
-# Add another:
-layers.Dense(16, activation='relu'),
-# Add another:
-layers.Dense(8, activation='relu'),
-# Add another:
-layers.Dense(4, activation='relu'),
-# Add another:
-layers.Dense(2, activation='relu'),
-# Add a softmax layer with 10 output units:
-layers.Dense(2, activation='softmax')
-])
+    def plot_training(history):
+        plt.figure()
+        plt.xlabel('Epoch')
+        plt.ylabel('Mean Abs Error [1000$]')
+        plt.plot(history.epoch, np.array(history.history['mean_absolute_error']),label='Train Loss')
+        plt.plot(history.epoch, np.array(history.history['val_mean_absolute_error']),label = 'Val loss')
+        plt.legend() 
+        plt.show()
 
-model.compile(optimizer=tf.train.AdamOptimizer(0.001),
-              loss='sparse_categorical_crossentropy',
-              metrics=['accuracy'])
+    def plot_predict(results, labels):
+        test_predictions = results.flatten()
+        plt.scatter(labels, test_predictions)
+        plt.xlabel('True Values [1000$]')
+        plt.ylabel('Predictions [1000$]')
+        plt.axis('equal')
+        _ = plt.plot([0, 1], [0, 1])
+        plt.show()
 
-#insert test data here
-print("DATA")
+if __name__=="__main__": 
+    event = np.random.randint(233100)
+    days = 7
 
-sched = sg.Schedule(test_id=10024)
-data = sched.getTimesTest(1,7)
-#data = np.random.randint(2, size=(1440, 7))
-sched = sg.Schedule(test_id=10024+7)
-labels = sched.getTimesTest(1,1)
-#labels = np.random.randint(2, size=(1440,1))
+    model = Network()
+     
+    sched = sg.Schedule(test_id=event)
+    train_data = sched.getTimesTest(1,days)
+    sched = sg.Schedule(test_id=event+days)
+    train_labels = sched.getTimesTest(1,1)
+    history = model.trainNetwork(1000,train_data,train_labels)
 
-print(data)
-print(labels)
-
-#insert validation data here
-#val_data = np.random.random((100, 32))
-#val_labels = np.random.random((100, 10))
-
-class PrintDot(keras.callbacks.Callback):
-  def on_epoch_end(self, epoch, logs):
-    if epoch % 100 == 0: print('')
-    print('.', end='')
-
-#early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10000)
-
-history = model.fit(data, labels, epochs=1000, validation_split=0.2, verbose=0, callbacks=[PrintDot()])
-
-sched = sg.Schedule(test_id=10024+1)
-data = sched.getTimesTest(1,7)
-#data = np.random.randint(2, size=(1440, 7))
-sched = sg.Schedule(test_id=10024+8)
-labels = sched.getTimesTest(1,1)
-#labels = np.random.randint(2, size=(1440,1))
-
-print("DATA")
-print(data)
-print(labels)
-
-print("EVALUATE")
-
-eva = model.evaluate(data, labels)
-
-print(eva)
-
-print("PREDICT")
-
-result = model.predict(data)
-print(result.shape)
-predictions = np.argmax
-#for i in range(0,len(result)):
-#    predictions.append(np.argmax(result[i]))
-print(result.shape)
-print("DONE")
-
-def plot_history(history):
-  plt.figure()
-  plt.xlabel('Epoch')
-  plt.ylabel('Mean Abs Error [1000$]')
-  plt.plot(history.epoch, np.array(history.history['mean_absolute_error']),label='Train Loss')
-  plt.plot(history.epoch, np.array(history.history['val_mean_absolute_error']),label = 'Val loss')
-  plt.legend() 
-  plt.show()
-
-def plot_predict(result, labels):
-  test_predictions = result.flatten()
-  print(test_predictions.shape)
-  print(labels.shape)
-#  for i in range(0,test_predictions.size):
-#    test_predictions[i] = round(test_predictions[i])
-#  plt.scatter(labels, test_predictions)
-  plt.xlabel('True Values [1000$]')
-  plt.ylabel('Predictions [1000$]')
-  plt.axis('equal')
-  _ = plt.plot([0, 1], [0, 1])
-  plt.show()
-
-#plot_history(history)
-#plot_predict(result, labels)
+    sched = sg.Schedule(test_id=event+1)
+    test_data = sched.getTimesTest(1,days)
+    sched = sg.Schedule(test_id=event+days+1)
+    test_labels = sched.getTimesTest(1,1)
+    results = model.testNetwork(test_data,test_labels)
