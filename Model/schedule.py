@@ -10,13 +10,23 @@ import schedule_generator as sg
 
 model = tf.keras.Sequential([
 # Adds a densely-connected layer with 64 units to the model:
-layers.Dense(2048, activation='relu'),
-# Add another:
-layers.Dense(1024, activation='relu'),
+layers.Dense(512, activation='relu'),
 # Add another:
 layers.Dense(256, activation='relu'),
 # Add another:
-layers.Dense(128, activation='tanh'),
+layers.Dense(128, activation='relu'),
+# Add another:
+layers.Dense(64, activation='relu'),
+# Add another:
+layers.Dense(32, activation='relu'),
+# Add another:
+layers.Dense(16, activation='relu'),
+# Add another:
+layers.Dense(8, activation='relu'),
+# Add another:
+layers.Dense(4, activation='relu'),
+# Add another:
+layers.Dense(2, activation='relu'),
 # Add a softmax layer with 10 output units:
 layers.Dense(1)
 ])
@@ -28,15 +38,15 @@ model.compile(optimizer=tf.train.RMSPropOptimizer(0.001),
 #insert test data here
 print("DATA")
 
-sched = sg.Schedule(test_id=10024)
+sched = sg.Schedule(test_id=10030)
 data = sched.getTimesTest(1,7)
 #data = np.random.randint(2, size=(1440, 7))
-sched = sg.Schedule(test_id=10024+7)
+sched = sg.Schedule(test_id=10030+7)
 labels = sched.getTimesTest(1,1)
 #labels = np.random.randint(2, size=(1440,1))
 
-#print(data)
-#print(labels)
+print(data)
+print(labels)
 
 #insert validation data here
 #val_data = np.random.random((100, 32))
@@ -45,18 +55,22 @@ labels = sched.getTimesTest(1,1)
 class PrintDot(keras.callbacks.Callback):
   def on_epoch_end(self, epoch, logs):
 #    if epoch % 100 == 0: print('')
-    print('', end='')
+    print('.', end='')
 
 #early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10000)
 
 history = model.fit(data, labels, epochs=1000, validation_split=0.2, verbose=0, callbacks=[PrintDot()])
 
-#data = np.random.randint(2, size=(1440,7))
+sched = sg.Schedule(test_id=10030+1)
+data = sched.getTimesTest(1,7)
+#data = np.random.randint(2, size=(1440, 7))
+sched = sg.Schedule(test_id=10030+8)
+labels = sched.getTimesTest(1,1)
 #labels = np.random.randint(2, size=(1440,1))
 
 print("DATA")
-#print(data)
-#print(labels)
+print(data)
+print(labels)
 
 print("EVALUATE")
 
@@ -68,7 +82,7 @@ print("PREDICT")
 
 result = model.predict(data)
 #print(result.shape)
-#print(result)
+print(result)
 print("DONE")
 
 def plot_history(history):
@@ -82,8 +96,8 @@ def plot_history(history):
 
 def plot_predict(result, labels):
   test_predictions = result.flatten()
-  for i in range(0,test_predictions.size):
-    test_predictions[i] = round(test_predictions[i])
+#  for i in range(0,test_predictions.size):
+#    test_predictions[i] = round(test_predictions[i])
   plt.scatter(labels, test_predictions)
   plt.xlabel('True Values [1000$]')
   plt.ylabel('Predictions [1000$]')
@@ -92,4 +106,4 @@ def plot_predict(result, labels):
   plt.show()
 
 #plot_history(history)
-#plot_predict(result, labels)
+plot_predict(result, labels)
