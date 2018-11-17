@@ -8,7 +8,7 @@ def load_data(file_name):
         data = []
         for row in csv_reader:
             if lines == 0:
-                print('Column names are ' + ", ".join(row))
+                #print('Column names are ' + ", ".join(row))
                 lines += 1
             else:
                 data.append(row)
