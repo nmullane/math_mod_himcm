@@ -29,8 +29,15 @@ class Schedule:
     def getTimesTest(self, day_start, day_end):
         start_times_mins = float(self.activities_data[self.id][4]) * 60.0
         end_times_mins = float(self.activities_data[self.id][5]) * 60.0
+
+        start_times_mins_2 = float(self.activities_data[self.id+100][4]) * 60.0
+        end_times_mins_2 = float(self.activities_data[self.id+100][5]) * 60.0
         #print self.activities_data[self.id][4]
         #print self.activities_data[self.id][5]
+
+        #print self.activities_data[self.id+100][4]
+        #print self.activities_data[self.id+100][5]
+
         #print start_times_mins
         #print end_times_mins
         times = []
@@ -41,10 +48,16 @@ class Schedule:
                 times[i].append(0)
         for j in range(num_days):
             for i in range(1440):
-                if i >= start_times_mins and i < end_times_mins:
-                    times[i][j] = 0
+                if j < 5:
+                    if i >= start_times_mins and i < end_times_mins:
+                        times[i][j] = 0
+                    else:
+                        times[i][j] = 1
                 else:
-                    times[i][j] = 1
+                    if i >= start_times_mins_2 and i < end_times_mins_2:
+                        times[i][j] = 0
+                    else:
+                        times[i][j] = 1
         times = np.array(times)
         return times
             
