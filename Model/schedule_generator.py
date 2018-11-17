@@ -1,3 +1,4 @@
+import sys, os
 import data_parser
 import numpy as np
 # Test, Fixed, Progressing, 
@@ -16,7 +17,8 @@ class Schedule:
             'Fixed': self.getTimesFixed,
             'Progressing': self.getTimesProgressing,
         }
-        self.activities_data = data_parser.load_data("Data/not_at_home_activities.csv")
+        
+        self.activities_data = data_parser.load_data(os.path.abspath(os.path.dirname(sys.argv[0])) + "/Data/not_at_home_activities.csv")
         self.id = test_id
         #print(self.activities_data[self.id][0])
 

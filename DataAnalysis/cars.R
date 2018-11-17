@@ -5,7 +5,7 @@
 #
 # clean up, set directory, load the library
 rm(list=ls())
-setwd("~/Desktop/DataScienceSeminar")
+setwd("~/himcm/DataAnalysis")
 library(ggplot2)
 source("myfunctions.R")
 #
