@@ -2,6 +2,7 @@ rm(list=ls())
 
 setwd("~/himcm/DataAnalysis")
 library(ggplot2)
+source("myfunctions.R")
 
 #Load activities data
 activities <- read.table("atus_00001.dat", header=T, sep = " ")
@@ -67,11 +68,20 @@ dev.new()
 hist(activities$Duration)
 hist(not_at_home$Duration)
 hist(start_times)
-plot(start_times, not_at_home$Duration)
+#plot(start_times, not_at_home$Duration)
+qplot(not_at_home$start_time[1:10000], not_at_home$Duration[1:10000], xlab="Start time (min)", ylab="Outing Duration")
+qplot(not_at_home$start_time[10000:20000], not_at_home$Duration[10000:20000], xlab="Start time (min)", ylab="Outing Duration")
+qplot(not_at_home$start_time[15543:25543], not_at_home$Duration[10000:20000], xlab="Start time (min)", ylab="Outing Duration")
+not_at_home$Duration[1:100]
+not_at_home <- not_at_home[sample(nrow(not_at_home)),]
+not_at_home$Duration[1:100]
+qplot(not_at_home$start_time[1:10000], not_at_home$Duration[1:10000], xlab="Start time (min)", ylab="Outing Duration")
+qplot(not_at_home$start_time[10000:20000], not_at_home$Duration[10000:20000], xlab="Start time (min)", ylab="Outing Duration")
+qplot(not_at_home$start_time[15543:25543], not_at_home$Duration[10000:20000], xlab="Start time (min)", ylab="Outing Duration")
 
-ggplot(activities, aes(x=activities$Duration)) + geom_histogram()
-ggplot(not_at_home, aes(x=not_at_home$Duration)) + geom_histogram()
-ggplot(not_at_home, aes(x=start_times, y=not_at_home$Duration)) + geom_histogram(stat="identity")
+#ggplot(activities, aes(x=activities$Duration)) + geom_histogram()
+#ggplot(not_at_home, aes(x=not_at_home$Duration)) + geom_histogram()
+#ggplot(not_at_home, aes(x=start_times, y=not_at_home$Duration)) + geom_histogram(stat="identity")
 
 
 #ggplot2.histogram(data=activities$Duration, xName="Activity Duration")
