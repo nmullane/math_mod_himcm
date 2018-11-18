@@ -43,11 +43,11 @@ class Classify:
         self.history = self.model.fit(train_data, train_labels, epochs=epoch_num, validation_split=0.2, verbose=0, callbacks=[PrintDot()])
         return self.history
  
-    def testNetwork(self,data,labels):
+    def testNetwork(self,data,labels=[]):
         test_data = data
         test_labels = labels
-        eva = self.model.evaluate(test_data, test_labels)
-        print(eva)
+        #eva = self.model.evaluate(test_data, test_labels)
+        #print(eva)
         results = self.model.predict(test_data)
         self.results = np.array(list(np.argmax(results, axis=1)))
         return self.results
@@ -87,7 +87,7 @@ if __name__=="__main__":
     test_data = sched.getTimesTest(1,days)
     sched = sg.Schedule(test_id=event+days+1)
     test_labels = sched.getTimesTest(1,1)
-    results = model.testNetwork(test_data,test_labels)
+    results = model.testNetwork(test_data,labels=test_labels)
     print(time.time()-before)
 
-    model.plot_predict(results, test_labels)
+    #model.plot_predict(results, test_labels)

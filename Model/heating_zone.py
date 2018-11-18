@@ -13,30 +13,33 @@ class heating_zone:
         self.morning_temp = morning_temp #Celcius
         self.day_temp = day_temp
         self.night_temp = night_temp
-        self.temp.append(self.morning_temp)
+        self.temp.append(self.night_temp)
         self.airmass = 1.225*2.4384*area #density of air kg/m^3 * average ceiling height in m * Area in m^2
         self.wattage = wattage #kW
         self.energy_usage.append(0)   #kJ
         self.time.append(0)
         
         
-    def update_temp(self, target_temp, outside_temp=10, timestep_min=5.0, heating_constant = 2.4/60, insulation = 0.033/60):
+    def update_temp(self, target_temp, outside_temp=10, timestep_min=5.0, heating_constant = 2.4/60, insulation = 0.033/60, status = 1):
         if target_temp == -1:
             target_temp = self.temp[-1]
         delta_T = timestep_min *( heating_constant * (target_temp - self.temp[-1]) +  insulation * (outside_temp - self.temp[-1]) )
 
         P = self.airmass * (abs( timestep_min * heating_constant * (target_temp - self.temp[-1]) )) / timestep_min / 60
         if P > self.wattage:
-            print("---------------------------")
-            print("T: " + str(delta_T))
-            print("P: " + str(P))
-            print("---")
+#            print("---------------------------")
+#            print("T: " + str(delta_T))
+#            print("P: " + str(P))
+#            print("---")
             P = self.wattage
-            delta_T = np.sign(delta_T) * P * timestep_min * 60 / self.airmass
-            print(".....")
-            print("T: " + str(delta_T))
-            print("P: " + str(P))
-            print("---")
+            delta_T = np.sign(delta_T) * P * timestep_min * 60 / self.airmass + timestep_min * insulation * (outside_temp - self.temp[-1]) 
+#            print(".....")
+#            print("T: " + str(delta_T))
+#            print("P: " + str(P))
+#            print("---")
+        if status == 0:
+            P = 0
+            delta_T = np.sign(delta_T) * P * timestep_min * 60 / self.airmass + timestep_min * insulation * (outside_temp - self.temp[-1])
 
         self.temp.append( self.temp[-1] + delta_T) 
         self.energy_usage.append(self.energy_usage[-1] + timestep_min * 60 * P)

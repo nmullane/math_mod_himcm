@@ -37,21 +37,21 @@ class Regression:
           def on_epoch_end(self, epoch, logs):
            if epoch % 100 == 0: print('')
            print('.', end='')    
-        #early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10000)
+        early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=100)
         self.history = self.model.fit(data, labels, epochs=epoch_num, validation_split=0.2, verbose=0, callbacks=[PrintDot()])
         return self.history
 
-    def testNetwork(self,data,labels):
+    def testNetwork(self,data,labels=[]):
         test_data = data.flatten('F')
-        test_labels = labels.flatten('F')
-        eva = self.model.evaluate(data, labels)
-        print(eva)
+#        test_labels = labels.flatten('F')
+#        eva = self.model.evaluate(data, labels)
+#        print(eva)
+#        correct = 0
+#        for i in range(0,labels.size): 
+#            if round(self.results[i,0]) == labels[i]:
+#                correct = correct + 1
+#        print(correct/labels.size) 
         self.results = self.model.predict(data)
-        correct = 0
-        for i in range(0,labels.size): 
-            if round(self.results[i,0]) == labels[i]:
-                correct = correct + 1
-        print(correct/labels.size)
         return self.results
 
     def plot_history(self,history):
@@ -88,7 +88,7 @@ if __name__=="__main__":
     test_data = sched.getTimesTest(1,days)
     sched = sg.Schedule(test_id=event+days+1)
     test_labels = sched.getTimesTest(1,1)
-    results = model.testNetwork(test_data,test_labels)
+    results = model.testNetwork(test_data,labels=test_labels)
     print(time.time()-before)
     
-    model.plot_predict(results, test_labels)
+    #model.plot_predict(results, test_labels)
