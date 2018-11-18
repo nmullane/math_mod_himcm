@@ -75,7 +75,7 @@ if __name__=="__main__":
     days = 30
     before=time.time()
 
-    model = CLassify()
+    model = Classify()
      
     sched = sg.Schedule(test_id=event)
     train_data = sched.getTimesTest(1,days)
