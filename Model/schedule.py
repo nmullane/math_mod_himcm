@@ -4,106 +4,91 @@ from tensorflow.keras import layers
 import numpy as np
 import matplotlib.pyplot as plt
 import schedule_generator as sg
+import time
 
-#class network:
-#    def __init__(self, days):
+class Regression:
+    def __init__(self):
+        self.model = tf.keras.Sequential([
+            layers.Dense(512, activation='relu'),
+            layers.Dense(256, activation='relu'),
+            layers.Dense(128, activation='relu'),
+            layers.Dense(64, activation='relu'),
+            layers.Dense(32, activation='relu'),
+            layers.Dense(16, activation='relu'),
+            layers.Dense(8, activation='relu'),
+            layers.Dense(4, activation='relu'),
+            layers.Dense(2, activation='relu'),
+            layers.Dense(1)
+            ])
+        self.loss = 'mse'
+        self.metric = 'mae'
+        self.step_size = 0.001
+        self.history = 0
+        self.results = 0
 
-model = tf.keras.Sequential([
-# Adds a densely-connected layer with 64 units to the model:
-layers.Dense(512, activation='relu'),
-# Add another:
-layers.Dense(256, activation='relu'),
-# Add another:
-layers.Dense(128, activation='relu'),
-# Add another:
-layers.Dense(64, activation='relu'),
-# Add another:
-layers.Dense(32, activation='relu'),
-# Add another:
-layers.Dense(16, activation='relu'),
-# Add another:
-layers.Dense(8, activation='relu'),
-# Add another:
-layers.Dense(4, activation='relu'),
-# Add another:
-layers.Dense(2, activation='relu'),
-# Add a softmax layer with 10 output units:
-layers.Dense(1)
-])
+    def trainNetwork(self,epoch_num,data,labels):
+        train_data = data.flatten('F')
+        train_labels = labels.flatten('F')
+        self.model.compile(
+              optimizer=tf.train.RMSPropOptimizer(self.step_size),
+              loss=self.loss,
+              metrics=[self.metric])
+        class PrintDot(keras.callbacks.Callback):
+          def on_epoch_end(self, epoch, logs):
+           if epoch % 100 == 0: print('')
+           print('.', end='')    
+        #early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10000)
+        self.history = self.model.fit(data, labels, epochs=epoch_num, validation_split=0.2, verbose=0, callbacks=[PrintDot()])
+        return self.history
 
-model.compile(optimizer=tf.train.RMSPropOptimizer(0.001),
-              loss='mse',
-              metrics=['mae'])
+    def testNetwork(self,data,labels):
+        test_data = data.flatten('F')
+        test_labels = labels.flatten('F')
+        eva = self.model.evaluate(data, labels)
+        print(eva)
+        self.results = self.model.predict(data)
+        correct = 0
+        for i in range(0,labels.size): 
+            if round(self.results[i,0]) == labels[i]:
+                correct = correct + 1
+        print(correct/labels.size)
+        return self.results
 
-#insert test data here
-print("DATA")
+    def plot_history(self,history):
+        plt.figure()
+        plt.xlabel('Epoch')
+        plt.ylabel('Mean Abs Error [1000$]')
+        plt.plot(history.epoch, np.array(history.history['mean_absolute_error']),label='Train Loss')
+        plt.plot(history.epoch, np.array(history.history['val_mean_absolute_error']),label = 'Val loss')
+        plt.legend() 
+        plt.show()
 
-sched = sg.Schedule(test_id=10030)
-data = sched.getTimesTest(1,7)
-#data = np.random.randint(2, size=(1440, 7))
-sched = sg.Schedule(test_id=10030+7)
-labels = sched.getTimesTest(1,1)
-#labels = np.random.randint(2, size=(1440,1))
+    def plot_predict(self,results, labels): 
+        plt.scatter(labels, results)
+        plt.xlabel('True Values [1000$]')
+        plt.ylabel('Predictions [1000$]')
+        plt.axis('equal')
+        _ = plt.plot([0, 1], [0, 1])
+        plt.show()
 
-print(data)
-print(labels)
+if __name__=="__main__":
+    event = np.random.randint(233100)
+    days = 365
+    before=time.time()
 
-#insert validation data here
-#val_data = np.random.random((100, 32))
-#val_labels = np.random.random((100, 10))
+    model = Regression()    
 
-class PrintDot(keras.callbacks.Callback):
-  def on_epoch_end(self, epoch, logs):
-#    if epoch % 100 == 0: print('')
-    print('.', end='')
+    sched = sg.Schedule(test_id=event)
+    train_data = sched.getTimesTest(1,days)
+    sched = sg.Schedule(test_id=event+days)
+    train_labels = sched.getTimesTest(1,1)
+    history = model.trainNetwork(1000,train_data,train_labels)
 
-#early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10000)
-
-history = model.fit(data, labels, epochs=1000, validation_split=0.2, verbose=0, callbacks=[PrintDot()])
-
-sched = sg.Schedule(test_id=10030+1)
-data = sched.getTimesTest(1,7)
-#data = np.random.randint(2, size=(1440, 7))
-sched = sg.Schedule(test_id=10030+8)
-labels = sched.getTimesTest(1,1)
-#labels = np.random.randint(2, size=(1440,1))
-
-print("DATA")
-print(data)
-print(labels)
-
-print("EVALUATE")
-
-eva = model.evaluate(data, labels)
-
-print(eva)
-
-print("PREDICT")
-
-result = model.predict(data)
-#print(result.shape)
-print(result)
-print("DONE")
-
-def plot_history(history):
-  plt.figure()
-  plt.xlabel('Epoch')
-  plt.ylabel('Mean Abs Error [1000$]')
-  plt.plot(history.epoch, np.array(history.history['mean_absolute_error']),label='Train Loss')
-  plt.plot(history.epoch, np.array(history.history['val_mean_absolute_error']),label = 'Val loss')
-  plt.legend() 
-  #plt.show()
-
-def plot_predict(result, labels):
-  test_predictions = result.flatten()
-#  for i in range(0,test_predictions.size):
-#    test_predictions[i] = round(test_predictions[i])
-  plt.scatter(labels, test_predictions)
-  plt.xlabel('True Values [1000$]')
-  plt.ylabel('Predictions [1000$]')
-  plt.axis('equal')
-  _ = plt.plot([0, 1], [0, 1])
-  plt.show()
-
-#plot_history(history)
-plot_predict(result, labels)
+    sched = sg.Schedule(test_id=event+1)
+    test_data = sched.getTimesTest(1,days)
+    sched = sg.Schedule(test_id=event+days+1)
+    test_labels = sched.getTimesTest(1,1)
+    results = model.testNetwork(test_data,test_labels)
+    print(time.time()-before)
+    
+    model.plot_predict(results, test_labels)

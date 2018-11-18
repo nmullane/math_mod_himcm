@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib
 import heating_zone as hz
 from cycler import cycler
 #This file instantiates all the rooms and updates their temperatures

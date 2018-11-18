@@ -4,8 +4,9 @@ from tensorflow.keras import layers
 import numpy as np
 import matplotlib.pyplot as plt
 import schedule_generator as sg
+import time
 
-class Network:
+class Classify:
     def __init__(self):
         self.class_names = ['away', 'home']
         self.model = tf.keras.Sequential([
@@ -24,8 +25,6 @@ class Network:
         self.loss = 'sparse_categorical_crossentropy'
         self.metric = 'accuracy'
         self.step_size = 0.001 
-        #self.event = event
-        #self.days = days
         self.history = 0
         self.results = 0
 
@@ -40,10 +39,9 @@ class Network:
           def on_epoch_end(self, epoch, logs):
             if epoch % 100 == 0: print('')
             print('.', end='')
-        #early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10000)
-        history = self.model.fit(train_data, train_labels, epochs=epoch_num, validation_split=0.2, verbose=0, callbacks=[PrintDot()])
-        self.history = history
-        return history
+        early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=100)
+        self.history = self.model.fit(train_data, train_labels, epochs=epoch_num, validation_split=0.2, verbose=0, callbacks=[PrintDot()])
+        return self.history
  
     def testNetwork(self,data,labels):
         test_data = data
@@ -51,11 +49,10 @@ class Network:
         eva = self.model.evaluate(test_data, test_labels)
         print(eva)
         results = self.model.predict(test_data)
-        results = np.array(list(np.argmax(results, axis=1)))
-        self.results = results
-        return results
+        self.results = np.array(list(np.argmax(results, axis=1)))
+        return self.results
 
-    def plot_training(history):
+    def plot_training(self,history):
         plt.figure()
         plt.xlabel('Epoch')
         plt.ylabel('Mean Abs Error [1000$]')
@@ -64,7 +61,7 @@ class Network:
         plt.legend() 
         plt.show()
 
-    def plot_predict(results, labels):
+    def plot_predict(self,results, labels):
         test_predictions = results.flatten()
         plt.scatter(labels, test_predictions)
         plt.xlabel('True Values [1000$]')
@@ -75,9 +72,10 @@ class Network:
 
 if __name__=="__main__": 
     event = np.random.randint(233100)
-    days = 7
+    days = 30
+    before=time.time()
 
-    model = Network()
+    model = CLassify()
      
     sched = sg.Schedule(test_id=event)
     train_data = sched.getTimesTest(1,days)
@@ -90,3 +88,6 @@ if __name__=="__main__":
     sched = sg.Schedule(test_id=event+days+1)
     test_labels = sched.getTimesTest(1,1)
     results = model.testNetwork(test_data,test_labels)
+    print(time.time()-before)
+
+    model.plot_predict(results, test_labels)

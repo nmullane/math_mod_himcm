@@ -25,18 +25,18 @@ class heating_zone:
             target_temp = self.temp[-1]
         delta_T = timestep_min *( heating_constant * (target_temp - self.temp[-1]) +  insulation * (outside_temp - self.temp[-1]) )
 
-        P = self.airmass * (abs(delta_T)) / timestep_min / 60
+        P = self.airmass * (abs( timestep_min * heating_constant * (target_temp - self.temp[-1]) )) / timestep_min / 60
         if P > self.wattage:
-            print "---------------------------"
-            print "T: " + str(delta_T)
-            print "P: " + str(P)
-            print "---"
+            print("---------------------------")
+            print("T: " + str(delta_T))
+            print("P: " + str(P))
+            print("---")
             P = self.wattage
             delta_T = np.sign(delta_T) * P * timestep_min * 60 / self.airmass
-            print"....."
-            print "T: " + str(delta_T)
-            print "P: " + str(P)
-            print "---"
+            print(".....")
+            print("T: " + str(delta_T))
+            print("P: " + str(P))
+            print("---")
 
         self.temp.append( self.temp[-1] + delta_T) 
         self.energy_usage.append(self.energy_usage[-1] + timestep_min * 60 * P)
