@@ -10,6 +10,7 @@ def load_data(file_name):
             if lines == 0:
                 #print('Column names are ' + ", ".join(row))
                 lines += 1
+                data.append(row)
             else:
                 data.append(row)
                 lines += 1
