@@ -22,23 +22,30 @@ class Thermo:
         self.epochs = epochs
         self.time_step = 5 #min 
         self.accuracy = [1]
+        self.results_monthly = []
+        self.results_yearly = []
+
     
-    def newDay(self,weekly,monthly,yearly):
+    def newDay(self,weekly,monthly,yearly, current_day):
         results = [0,0,0]
         
         week = cl.Classify() 
         history = week.trainNetwork(self.epochs,weekly[:,:7:],weekly[:,7:8:])
         results[0] = week.testNetwork(weekly[:,1:8:]) 
         
-        month = rg.Regression()
-        history = month.trainNetwork(self.epochs,monthly[:,:30:],monthly[:,30:31:])
-        results[1] = month.testNetwork(monthly[:,1:31:]) 
-        results[1] = results[1].flatten()
+        if current_day % 15 == 1 or current_day == 0:
+            month = rg.Regression()
+            history = month.trainNetwork(self.epochs,monthly[:,:30:],monthly[:,30:31:])
+            self.results_monthly = month.testNetwork(monthly[:,1:31:]) 
+            self.results_monthly = self.results_monthly.flatten()
+        results[1] = self.results_monthly
  
-        year = rg.Regression()
-        history = year.trainNetwork(self.epochs,yearly[:,:365:],yearly[:,365:366:])
-        results[2] = year.testNetwork(yearly[:,1:366:])
-        results[2] = results[2].flatten()
+        if current_day % (365/2) == 1 or current_day == 0:
+            year = rg.Regression()
+            history = year.trainNetwork(self.epochs,yearly[:,:365:],yearly[:,365:366:])
+            self.results_yearly = year.testNetwork(yearly[:,1:366:])
+            self.results_yearly = self.results_yearly.flatten()
+        results[2] = self.results_yearly
         
         self.results = np.average(results, axis=0)
         return self.results
@@ -56,12 +63,12 @@ class Thermo:
     def plotAccuracy(self):
         plt.subplot(211)
         plt.plot(self.time, self.accuracy)
-        plt.xlabel('time')
+        plt.xlabel('time (days)')
         plt.ylabel('accuracy')
         plt.subplot(212)
         plt.plot(self.time, thermostat.zone.temp)
-        plt.xlabel('time')
-        plt.ylabel('temperature')
+        plt.xlabel('time (minutes)')
+        plt.ylabel('temperature (celcius)')
         plt.show()
 
     def updateTemp(self,results,outside_temp,person):
@@ -99,25 +106,25 @@ class Thermo:
 
 if __name__=="__main__":
     event = np.random.randint(400,24637)
-    days = 2
+    days = 7
     current_day = 0
     out = ot.outside_temp()
     outs = out.get_temp(1, 365)
     thermostat = Thermo([25, 20, 18], 100, 1.8,0.033/60,100)
 
+    sched1 = sg.Schedule(num_outings = 2, variation_weekday = .5, variation_weekend = .5, test_id=event-8)
+    sched2 = sg.Schedule(num_outings = 2, variation_weekday = .5, variation_weekend = .5, test_id=event-31)
+    sched3 = sg.Schedule(num_outings = 2, variation_weekday = .5, variation_weekend = .5,test_id=event-366)
+    sched4 = sg.Schedule(num_outings = 2, variation_weekday = .5, variation_weekend = .5,test_id=event)
     while current_day < days:
         event = event+1 
-        sched = sg.Schedule(test_id=event-8)
-        weekly = sched.getTimesTest(1,8) 
-        sched = sg.Schedule(test_id=event-31)
-        monthly = sched.getTimesTest(1,31)
-        sched = sg.Schedule(test_id=event-366)
-        yearly = sched.getTimesTest(1,366)
-        sched = sg.Schedule(test_id=event)
-        today = sched.getTimesTest(1,1) 
+        weekly = sched1.getTimes(current_day,current_day+7) 
+        monthly = sched2.getTimes(current_day,current_day+30)
+        yearly = sched3.getTimes(current_day,current_day+365)
+        today = sched4.getTimes(current_day,current_day) 
     
         before = time.time()
-        results = thermostat.newDay(weekly,monthly,yearly)
+        results = thermostat.newDay(weekly,monthly,yearly,current_day)
         print(time.time()-before)
         thermostat.zone.time = [0]
         while thermostat.zone.time[-1] < 23.999:
