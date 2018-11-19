@@ -195,5 +195,5 @@ if __name__=="__main__":
     sched = Schedule(scheduleType = "Progressing", num_outings = 4, test_id=10024, variation_weekday = .6, variation_weekend = .7, progression_rate=2)
     times = sched.getTimes(7, 9)
     np.set_printoptions(threshold=np.inf)
-    print times
-    print times.shape
+#    print times
+#    print times.shape
