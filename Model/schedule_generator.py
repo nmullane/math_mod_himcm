@@ -4,7 +4,7 @@ import numpy as np
 # Test, Fixed, Progressing, 
 class Schedule:
 
-    def __init__(self, scheduleType="Test", wake_up=7.0, sleep=11.0, typical=1, num_outings=1, variation_weekday=0, variation_weekend=0, abrupt_change_per_year=0, test_id=0, progression_rate = 0):
+    def __init__(self, scheduleType="Fixed", wake_up=7.0, sleep=11.0, typical=1, num_outings=4, variation_weekday=1, variation_weekend=1, abrupt_change_per_year=2, test_id=0, progression_rate = 0):
         self.scheduleType = scheduleType
         self.wake_up = wake_up
         self.sleep = sleep
@@ -54,8 +54,8 @@ class Schedule:
 
             self.base_start_times.append(float(self.clustered_data[self.clust_id][4]))
             self.base_durations.append(float(self.clustered_data[self.clust_id][3]))
-        print self.base_start_times
-        print self.base_durations
+        #print self.base_start_times
+        #print self.base_durations
             
         self.base_weekend_start_times = []
         self.base_weekend_durations = []
@@ -72,8 +72,8 @@ class Schedule:
             self.base_weekend_start_times.append(float(self.clustered_data[self.clust_id][4]))
             self.base_weekend_durations.append(float(self.clustered_data[self.clust_id][3]))
 
-        print self.base_weekend_start_times
-        print self.base_weekend_durations
+        #print self.base_weekend_start_times
+        #print self.base_weekend_durations
         
     #1440x7
     def getTimesTest(self, day_start, day_end):
@@ -137,7 +137,7 @@ class Schedule:
             for i in range(1440):
                 if j < 5:
                     for k in range(len(start_times)):
-                        print k
+                        #print k
                         if i >= start_times[k] * 60.0  and i < start_times[k] * 60.0 + durations[k]:
                             #print k
                             times[i][j] = 0

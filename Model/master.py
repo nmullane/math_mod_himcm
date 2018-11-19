@@ -98,12 +98,12 @@ class Thermo:
         
 
 if __name__=="__main__":
-    event = np.random.randint(400,232700)
+    event = np.random.randint(400,24637)
     days = 2
     current_day = 0
     out = ot.outside_temp()
     outs = out.get_temp(1, 365)
-    thermostat = Thermo([25, 20, 18], 100, 1.8,0.033/60,1000)
+    thermostat = Thermo([25, 20, 18], 100, 1.8,0.033/60,100)
 
     while current_day < days:
         event = event+1 
