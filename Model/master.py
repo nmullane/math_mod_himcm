@@ -6,6 +6,7 @@ import heating_zone as hz
 import schedule_generator as sg
 import classify as cl
 import regression as rg
+import outside_temp_generator as ot
 from cycler import cycler
 import time
 
@@ -98,9 +99,11 @@ class Thermo:
 
 if __name__=="__main__":
     event = np.random.randint(400,232700)
-    days = 365
+    days = 2
     current_day = 0
-    thermostat = Thermo([25, 20, 18], 100, 1.8,0.033/60,10)
+    out = ot.outside_temp()
+    outs = out.get_temp(1, 365)
+    thermostat = Thermo([25, 20, 18], 100, 1.8,0.033/60,1000)
 
     while current_day < days:
         event = event+1 
@@ -117,8 +120,8 @@ if __name__=="__main__":
         results = thermostat.newDay(weekly,monthly,yearly)
         print(time.time()-before)
         thermostat.zone.time = [0]
-        while thermostat.zone.time[-1] < 23.99:
-            thermostat.updateTemp(results,10,thermostat.checkPerson(today))
+        while thermostat.zone.time[-1] < 23.999:
+            thermostat.updateTemp(results,outs[int(np.floor(thermostat.zone.time[-1])),current_day],thermostat.checkPerson(today))
         thermostat.updateAccuracy(results,today)
         current_day = current_day + 1
 
