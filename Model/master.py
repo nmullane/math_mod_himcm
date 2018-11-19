@@ -19,8 +19,9 @@ class Thermo:
         self.time = []
         self.time.append(0)
         self.epochs = epochs
-        
-
+        self.time_step = 5 #min 
+        self.accuracy = [1]
+    
     def newDay(self,weekly,monthly,yearly):
         results = [0,0,0]
         
@@ -41,6 +42,27 @@ class Thermo:
         self.results = np.average(results, axis=0)
         return self.results
 
+    def updateAccuracy(self,results,today):
+        today = today.flatten()
+        correct = 0.0
+        total = 0.0
+        for i in range(0,len(results),self.time_step):
+            if today[i] == round(results[i]):
+                correct = correct + 1
+            total = total + 1
+            self.accuracy.append(correct/total)
+
+    def plotAccuracy(self):
+        plt.subplot(211)
+        plt.plot(self.time, self.accuracy)
+        plt.xlabel('time')
+        plt.ylabel('accuracy')
+        plt.subplot(212)
+        plt.plot(self.time, thermostat.zone.temp)
+        plt.xlabel('time')
+        plt.ylabel('temperature')
+        plt.show()
+
     def updateTemp(self,results,outside_temp,person):
         zone = self.zone
         last_time = round(zone.time[-1]*60)
@@ -54,7 +76,7 @@ class Thermo:
 
         time_need = (self.wattage/(zone.airmass*abs(temp - zone.temp[-1]+1)))/60
         index = int(last_time + round(time_need))
-        future = results[index]
+        future = round(results[index])
 
         if(zone.time[-1]%(24.0) + time_need/24 >= bld.morning and zone.time[-1]%(24.0*60) + time_need/24 < bld.day):
             target_temp = zone.morning_temp
@@ -64,36 +86,42 @@ class Thermo:
             target_temp = zone.night_temp
 
         if round(results[last_time]) == 1 or future == 1 or person == 1:
-            zone.update_temp(target_temp,outside_temp=outside_temp,status=1) 
-        else:# round(results[last_time]) == 0 and future == 0 and person == 0:
-            zone.update_temp(target_temp,outside_temp=outside_temp,status=0)
+            zone.update_temp(target_temp,outside_temp=outside_temp,timestep_min=self.time_step,status=1) 
+        elif round(results[last_time]) == 0 and future == 0 and person == 0:
+            zone.update_temp(target_temp,outside_temp=outside_temp,timestep_min=self.time_step,status=0)
+        self.time.append(self.time[-1] + self.time_step / 60)
 
     def checkPerson(self,today):
-        person = today[round(self.zone.time[-1]*60)]
+        person = today[int(self.zone.time[-1]*60)]
         return person
         
 
 if __name__=="__main__":
-    event = np.random.randint(367,233100)
+    event = np.random.randint(400,232700)
+    days = 365
+    current_day = 0
+    thermostat = Thermo([25, 20, 18], 100, 1.8,0.033/60,10)
 
-    thermostat = Thermo([25, 20, 18], 100, 1.8,0.033/60,100)
-
-    sched = sg.Schedule(test_id=event-8)
-    weekly = sched.getTimesTest(1,8) 
-    sched = sg.Schedule(test_id=event-31)
-    monthly = sched.getTimesTest(1,31)
-    sched = sg.Schedule(test_id=event-366)
-    yearly = sched.getTimesTest(1,366)
-    sched = sg.Schedule(test_id=event)
-    today = sched.getTimesTest(1,1) 
+    while current_day < days:
+        event = event+1 
+        sched = sg.Schedule(test_id=event-8)
+        weekly = sched.getTimesTest(1,8) 
+        sched = sg.Schedule(test_id=event-31)
+        monthly = sched.getTimesTest(1,31)
+        sched = sg.Schedule(test_id=event-366)
+        yearly = sched.getTimesTest(1,366)
+        sched = sg.Schedule(test_id=event)
+        today = sched.getTimesTest(1,1) 
     
-    before = time.time()
-    results = thermostat.newDay(weekly,monthly,yearly)
-    print(time.time()-before)
+        before = time.time()
+        results = thermostat.newDay(weekly,monthly,yearly)
+        print(time.time()-before)
+        thermostat.zone.time = [0]
+        while thermostat.zone.time[-1] < 23.99:
+            thermostat.updateTemp(results,10,thermostat.checkPerson(today))
+        thermostat.updateAccuracy(results,today)
+        current_day = current_day + 1
 
-while thermostat.zone.time[-1] < 23.99:
-    thermostat.updateTemp(results,10,thermostat.checkPerson(today))
-print("DONE")
-thermostat.zone.graph_over_time(thermostat.zone.temp)
-
+    print("DONE")
+    thermostat.plotAccuracy()
  
