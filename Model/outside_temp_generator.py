@@ -8,7 +8,7 @@ class outside_temp:
         self.weather_data = np.array(data_parser.load_data(os.path.abspath(os.path.dirname(sys.argv[0])) + "/Data/MonthlyDurham.csv"))
     def get_temp(self, day_start, day_end):
         temps = np.empty((24, 365))
-        print self.weather_data[1]
+#        print(self.weather_data[1])
         for i in range(day_start, day_end + 1):
             for j in range(24):
                 day_max = float(self.weather_data[i+1][2])
@@ -22,6 +22,6 @@ if __name__ == "__main__":
     np.set_printoptions(threshold=np.inf)
     outs = out.get_temp(1, 365)
 
-    print outs[:,1]
-    print outs.shape
+    print(outs[:,1])
+    print(outs.shape)
 
