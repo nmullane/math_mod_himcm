@@ -12,6 +12,7 @@ class Schedule:
         self.variation_weekday = variation_weekday
         self.variation_weekend = variation_weekend
         self.abrupt_change_per_year = abrupt_change_per_year
+        self.progression_rate = progression_rate
         self.functions = {}
         self.functions = {
             'Test': self.getTimesTest,
@@ -115,18 +116,7 @@ class Schedule:
     def getTimesFixed(self, day_start, day_end):
         num_days = day_end - day_start + 1
         times = []
-        start_times = []
-        durations = []
-        start_times_weekend = []
-        durations_weekend = []
         
-        #Modulate start and duration for the day
-        for i in range(len(self.base_start_times)):
-            start_times.append(self.base_start_times[i] + np.random.ranf() * self.variation_weekday - self.variation_weekday/2.0)
-            durations.append(self.base_durations[i] + np.random.ranf() * self.variation_weekday * 60.0 - self.variation_weekday/2.0 * 60.0)
-        for i in range(len(self.base_weekend_start_times)):
-            start_times_weekend.append(self.base_weekend_start_times[i] + np.random.ranf() * self.variation_weekend - self.variation_weekend/2.0)
-            durations_weekend.append(self.base_weekend_durations[i] + np.random.ranf() * self.variation_weekend * 60.0 - self.variation_weekend/2.0 * 60.0)
             
 
         for i in range(1440):
@@ -134,6 +124,17 @@ class Schedule:
             for j in range(num_days):
                 times[i].append(1)
         for j in range(num_days):
+            start_times = []
+            durations = []
+            start_times_weekend = []
+            durations_weekend = []
+            #Modulate start and duration for the day
+            for idx in range(len(self.base_start_times)):
+                start_times.append(self.base_start_times[idx] + np.random.ranf() * self.variation_weekday - self.variation_weekday/2.0)
+                durations.append(self.base_durations[idx] + np.random.ranf() * self.variation_weekday * 60.0 - self.variation_weekday/2.0 * 60.0)
+            for idx in range(len(self.base_weekend_start_times)):
+                start_times_weekend.append(self.base_weekend_start_times[idx] + np.random.ranf() * self.variation_weekend - self.variation_weekend/2.0)
+                durations_weekend.append(self.base_weekend_durations[idx] + np.random.ranf() * self.variation_weekend * 60.0 - self.variation_weekend/2.0 * 60.0)
             for i in range(1440):
                 if j < 5:
                     for k in range(len(start_times)):
@@ -147,16 +148,52 @@ class Schedule:
                             times[i][j] = 0
         return np.array(times)
     def getTimesProgressing(self, day_start, day_end):
-        times = []
         num_days = day_end - day_start + 1
+        times = []
+        
+            
 
+        for i in range(1440):
+            times.append([])
+            for j in range(num_days):
+                times[i].append(1)
+        for j in range(num_days):
+            start_times = []
+            durations = []
+            start_times_weekend = []
+            durations_weekend = []
+            #Modulate start and duration for the day
+            for idx in range(len(self.base_start_times)):
+                start_times.append(self.base_start_times[idx] + np.random.ranf() * self.variation_weekday - self.variation_weekday/2.0)
+                durations.append(self.base_durations[idx] + np.random.ranf() * self.variation_weekday * 60.0 - self.variation_weekday/2.0 * 60.0)
+            for idx in range(len(self.base_weekend_start_times)):
+                start_times_weekend.append(self.base_weekend_start_times[idx] + np.random.ranf() * self.variation_weekend - self.variation_weekend/2.0)
+                durations_weekend.append(self.base_weekend_durations[idx] + np.random.ranf() * self.variation_weekend * 60.0 - self.variation_weekend/2.0 * 60.0)
+
+            for idx in range(len(self.base_start_times)):
+                self.base_start_times[idx] += self.progression_rate * num_days/7.0
+            for idx in range(len(self.base_weekend_start_times)):
+                self.base_weekend_start_times[idx] += self.progression_rate * num_days/7.0
+            for i in range(1440):
+                if j < 5:
+                    for k in range(len(start_times)):
+                        #print k
+                        if i >= start_times[k] * 60.0  and i < start_times[k] * 60.0 + durations[k]:
+                            #print k
+                            times[i][j] = 0
+                else:
+                    for k in range(len(start_times_weekend)):
+                        if i >= start_times_weekend[k] * 60.0 and i < start_times_weekend[k] * 60.0 + durations_weekend[k]:
+                            times[i][j] = 0
+
+        return np.array(times)
 
     def getTimes(self, day_start, day_end):
         return self.functions[self.scheduleType](day_start, day_end)
 
 if __name__=="__main__":
-    sched = Schedule(scheduleType = "Fixed", num_outings = 4, test_id=10024, variation_weekday = .1, variation_weekend = .7)
-    times = sched.getTimes(7, 7)
+    sched = Schedule(scheduleType = "Progressing", num_outings = 4, test_id=10024, variation_weekday = .6, variation_weekend = .7, progression_rate=2)
+    times = sched.getTimes(7, 9)
     np.set_printoptions(threshold=np.inf)
-    #print times
-    #print times.shape
+    print times
+    print times.shape
